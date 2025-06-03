@@ -1,0 +1,21 @@
+[project]
+name = "guess-game-be"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Gokul Sudheesh",email = "gokulsudheesh1@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi (>=0.115.12,<0.116.0)",
+    "uvicorn (>=0.34.3,<0.35.0)"
+]
+
+[tool.poetry]
+packages = [{include = "guess_game_be", from = "src"}]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
