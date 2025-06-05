@@ -5,14 +5,14 @@ from langchain_core.prompts import PromptTemplate
 from pydantic import BaseModel, Field
 from os import getenv
 from dotenv import load_dotenv
+from langchain_ollama import ChatOllama
+
 
 load_dotenv()
-API_KEY = getenv("NVIDIA_API_KEY")
 
-model = ChatNVIDIA(
-    model="deepseek-ai/deepseek-r1",
-    api_key=API_KEY,
-    temperature=0.6,
+model = ChatOllama(
+    model="deepseek-r1:1.5b",
+    base_url=getenv("OLLAMA_BASE_URL"),
 )
 
 # Define your desired data structure.
