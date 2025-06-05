@@ -38,7 +38,7 @@ output_parser = JsonOutputParser(pydantic_object=Guess)
 
 # Mapping of user responses to the model's expected input
 mapper = {1: "yes", 2: "no", 3: "maybe",
-          4: "dont think so", 5: "dont know", 6: "exit"}
+          4: "dont think so", 5: "dont know"}
 
 chat_prompt_template = ChatPromptTemplate(
     messages=[
