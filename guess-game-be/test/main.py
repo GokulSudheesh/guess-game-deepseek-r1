@@ -51,19 +51,28 @@ async def main():
 6 -> Exit
 > """
         )
-        user_input = int(user_input.strip())
+        try:
+            user_input = int(user_input.strip())
+        except:
+            print("Invalid input. Please enter a number between 1 and 6.")
+            continue
         if user_input == 6:
             log.append(f"Chat history:\n{json.dumps(chat_history, indent=2)}")
             log.flush()
             break
         elif user_input not in mapper:
-            print("Invalid input. Please try again.")
+            print("Invalid input. Please enter a number between 1 and 6.")
             continue
         user_input = mapper.get(user_input)
         print(f"You: {user_input}")
         # Invoke the chain with the current chat history
-        response = await get_response(query=user_input)
-
+        try:
+            response = await get_response(query=user_input)
+        except Exception as e:
+            log.append(f"Error: {str(e)}")
+            print(
+                "An error occurred while processing your input. Please enter your previous response again.")
+            continue
         # Print the model's response
         print(json.dumps(response.data, indent=2))
 

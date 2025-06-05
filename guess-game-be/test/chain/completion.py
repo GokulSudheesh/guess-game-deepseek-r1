@@ -15,8 +15,8 @@ class Completion:
         match config.PLATFORM_TO_USE:
             case Platform.NVIDIA:
                 rate_limiter = InMemoryRateLimiter(
-                    # <-- Super slow! Sadly, we can only make a request once every 40 seconds!!
-                    requests_per_second=0.025,
+                    # <-- Super slow! Sadly, we can only make a request once every 10 seconds!!
+                    requests_per_second=0.1,
                     # Wake up every 100 ms to check whether allowed to make a request,
                     check_every_n_seconds=0.1,
                     max_bucket_size=10,  # Controls the maximum burst size.
@@ -29,7 +29,8 @@ class Completion:
                 self.model = ChatOllama(
                     **config.OLLAMA_MODEL_CONFIG,
                 )
-        self.chain = chat_prompt_template | self.model
+        self.chain = chat_prompt_template | self.model.with_retry(
+            stop_after_attempt=6, wait_exponential_jitter=True)
 
     async def invoke(self, *, query: str, chat_history: list[dict] | None = []) -> CompletionResponse:
         response = await self.chain.ainvoke({"user_input": query, "history": chat_history or []})
@@ -44,13 +45,9 @@ class Completion:
 
     @staticmethod
     def clean_and_parse(output: str) -> dict | None:
-        try:
-            output = output_parser.parse(Completion.clean_output(
-                output))
-            return output
-        except Exception as e:
-            print(f"Error parsing output: {e}")
-            return None
+        output = output_parser.parse(Completion.clean_output(
+            output))
+        return output
 
 
 completion = Completion()
