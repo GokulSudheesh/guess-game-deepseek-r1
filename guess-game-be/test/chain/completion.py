@@ -1,3 +1,4 @@
+import math
 from langchain_nvidia_ai_endpoints import ChatNVIDIA
 from langchain_ollama import ChatOllama
 from langchain_core.rate_limiters import InMemoryRateLimiter
@@ -9,17 +10,17 @@ from models.completion_response import CompletionResponse
 
 class Completion:
     def __init__(self):
-        rate_limiter = InMemoryRateLimiter(
-            # <-- Super slow! We can only make a request once every 10 seconds!!
-            requests_per_second=0.1,
-            # Wake up every 100 ms to check whether allowed to make a request,
-            check_every_n_seconds=0.1,
-            max_bucket_size=10,  # Controls the maximum burst size.
-        )
         print(
             f"Using {config.PLATFORM_TO_USE.upper()} platform for completion")
         match config.PLATFORM_TO_USE:
             case Platform.NVIDIA:
+                rate_limiter = InMemoryRateLimiter(
+                    # <-- Super slow! Sadly, we can only make a request once every 40 seconds!!
+                    requests_per_second=0.025,
+                    # Wake up every 100 ms to check whether allowed to make a request,
+                    check_every_n_seconds=0.1,
+                    max_bucket_size=10,  # Controls the maximum burst size.
+                )
                 self.model = ChatNVIDIA(
                     **config.NVIDIA_MODEL_CONFIG,
                     rate_limiter=rate_limiter
@@ -30,10 +31,12 @@ class Completion:
                 )
         self.chain = chat_prompt_template | self.model
 
-    async def invoke(self, *, query: str, chat_history: list[dict] | None = None) -> CompletionResponse:
+    async def invoke(self, *, query: str, chat_history: list[dict] | None = []) -> CompletionResponse:
         response = await self.chain.ainvoke({"user_input": query, "history": chat_history or []})
+        usage_metadata = (response.to_json().get(
+            "kwargs", {}).get("usage_metadata", {}))
         content = response.text()
-        return CompletionResponse(content=content, data=self.clean_and_parse(content))
+        return CompletionResponse(content=content, data={**self.clean_and_parse(content), "question_number": math.ceil(len(chat_history) / 2) + 1}, usage_metadata=usage_metadata)
 
     @staticmethod
     def clean_output(output: str):

@@ -13,12 +13,15 @@ chat_history = []
 async def get_response(*, query: str) -> CompletionResponse:
     """Get a response from the model."""
     response = await completion.invoke(query=query, chat_history=chat_history)
-    print(f"Model: {response.content}")
+    # print(f"Model: {response.content}")
     log.append(f"User: {query}")
+    log.append(f"***********************************************************" * 2)
     log.append(f"Model: {response.content}")
+    log.append(f"Model Metrics: {response.usage_metadata}")
 
     chat_history.append({"role": "user", "content": query})
-    chat_history.append({"role": "assistant", "content": response.content})
+    chat_history.append({"role": "assistant", "content": response.data.get(
+        "question") or response.content})
     return response
 
 
@@ -48,10 +51,15 @@ async def main():
 6 -> Exit
 > """
         )
-        if int(user_input) == 6:
+        user_input = int(user_input.strip())
+        if user_input == 6:
+            log.append(f"Chat history:\n{json.dumps(chat_history, indent=2)}")
             log.flush()
             break
-        user_input = mapper.get(int(user_input), user_input)
+        elif user_input not in mapper:
+            print("Invalid input. Please try again.")
+            continue
+        user_input = mapper.get(user_input)
         print(f"You: {user_input}")
         # Invoke the chain with the current chat history
         response = await get_response(query=user_input)

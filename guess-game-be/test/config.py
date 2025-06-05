@@ -1,11 +1,10 @@
 import os
 from dataclasses import dataclass
 from dotenv import load_dotenv
-from typing import Mapping
 from dataclasses import field
-from typing import Any, Mapping
 from enum import StrEnum
-
+from datetime import datetime
+import re
 
 # Load environment variables from .env file
 load_dotenv()
@@ -29,19 +28,23 @@ class Config():
     OLLAMA_MODEL_NAME: str = os.getenv(
         "OLLAMA_MODEL_NAME")
 
-    FILEPATH: str = os.path.join(os.path.dirname(__file__), "logs", "log.txt")
+    FILEPATH: str = os.path.join(
+        os.path.dirname(__file__),
+        "logs",
+        f"log-{re.sub(r'[:.]', '-', datetime.now().isoformat())}.txt"
+    )
     NVIDIA_MODEL_CONFIG: dict = field(default_factory=lambda: {
         "model": Config.NVIDIA_MODEL_NAME,
         "api_key": Config.NVIDIA_API_KEY,
         "temperature": 0.3,
-        "token_limit": 0
+        "max_tokens": 4096
     })
 
     OLLAMA_MODEL_CONFIG: dict = field(default_factory=lambda: {
         "base_url": Config.OLLAMA_BASE_URL,
         "model": Config.OLLAMA_MODEL_NAME,
         "temperature": 0.5,
-        # "token_limit": 0
+        "max_tokens": 4096
     })
 
 
