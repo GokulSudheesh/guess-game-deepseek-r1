@@ -50,7 +50,7 @@ A silly guess game for testing out the thinking capability of deep seek model ho
 
 ## API Endpoints
 
-##### `POST /api/v1/guess/start` — Initiate a session
+#### `POST /api/v1/guess/start` — Initiate a session
 
 **Curl**
 
@@ -73,7 +73,7 @@ curl --location --request POST 'http://localhost:8000/api/v1/guess/start'
 }
 ```
 
-##### `POST /api/v1/guess/ask` — Answer to the bot's yes / no question
+#### `POST /api/v1/guess/ask` — Answer to the bot's yes / no question
 
 **Curl**
 
