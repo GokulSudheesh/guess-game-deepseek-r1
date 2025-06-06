@@ -1,3 +1,4 @@
+import json
 import logging
 from fastapi import APIRouter, HTTPException
 from app.core.models.guess_request import AnswerEnum, GuessRequestBody, GuessResponseWrapper
@@ -13,7 +14,7 @@ router = APIRouter(prefix="/guess", tags=["Guess"])
 @router.post("/start")
 async def guess_start() -> GuessResponseWrapper:
     session_id = chat_manager.create_session()
-    response = await completion.invoke(query=initial_user_chat, chat_history=[])
+    response = await completion.invoke_with_retry(query=initial_user_chat, chat_history=[])
     chat_manager.add_message(
         session_id=session_id, role=ChatRole.USER, content=initial_user_chat)
     chat_manager.add_message(session_id=session_id, role=ChatRole.ASSISTANT,
@@ -41,8 +42,8 @@ async def guess_ask(body: GuessRequestBody) -> GuessResponseWrapper:
     answer = user_answer_mapper.get(body.answer)
     chat_history = chat_manager.get_session(session_id).get_history()
     logging.info(
-        f"Session ID: {session_id}, Answer: {answer}, Chat History: {chat_history}")
-    response = await completion.invoke(query=answer, chat_history=chat_history)
+        f"Session ID: {session_id}, Answer: {answer}, Chat History: {json.dumps(chat_history, indent=2)}")
+    response = await completion.invoke_with_retry(query=answer, chat_history=chat_history)
     logging.info(
         f"Session ID: {session_id}, Response: {response.data.get('question') or response.content}, Confidence: {response.data.get('confidence')}")
     chat_manager.add_message(

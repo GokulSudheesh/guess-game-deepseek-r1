@@ -15,7 +15,7 @@ chat_manager = ChatManager()
 async def get_response(*, query: str, session_id: str) -> CompletionResponse:
     """Get a response from the model."""
     chat_history = chat_manager.get_session(session_id).get_history()
-    response = await completion.invoke(query=query, chat_history=chat_history)
+    response = await completion.invoke_with_retry(query=query, chat_history=chat_history)
     # print(f"Model: {response.content}")
     log.append(f"User: {query}")
     log.append(f"***********************************************************" * 2)

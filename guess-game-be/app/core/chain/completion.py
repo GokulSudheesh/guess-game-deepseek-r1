@@ -2,6 +2,7 @@ import math
 from langchain_nvidia_ai_endpoints import ChatNVIDIA
 from langchain_ollama import ChatOllama
 from langchain_core.rate_limiters import InMemoryRateLimiter
+from langchain_core.runnables import RunnableLambda
 from app.core.chain.prompts import chat_prompt_template, output_parser
 from app.core.config import settings, Platform
 import re
@@ -33,12 +34,22 @@ class Completion:
         self.chain = chat_prompt_template | self.model.with_retry(
             stop_after_attempt=6, wait_exponential_jitter=True)
 
-    async def invoke(self, *, query: str, chat_history: list[dict] | None = []) -> CompletionResponse:
-        response = await self.chain.ainvoke({"user_input": query, "history": chat_history or []})
+    async def invoke(self, params: dict) -> CompletionResponse:
+        logging.info(f"Invoking completion with query: {params.get('query')}")
+        query = params.get("query")
+        chat_history = params.get("chat_history") or []
+        response = await self.chain.ainvoke({"user_input": query, "history": chat_history})
         usage_metadata = (response.to_json().get(
             "kwargs", {}).get("usage_metadata", {}))
         content = response.text()
         return CompletionResponse(content=content, data={**self.clean_and_parse(content), "question_number": math.ceil(len(chat_history) / 2) + 1}, usage_metadata=usage_metadata)
+
+    async def invoke_with_retry(self, *, query: str, chat_history: list[dict] | None = []) -> CompletionResponse:
+        runnable = RunnableLambda(self.invoke)
+        return await runnable.with_retry(
+            stop_after_attempt=3,
+            wait_exponential_jitter=True
+        ).ainvoke({"query": query, "chat_history": chat_history})
 
     @staticmethod
     def clean_output(output: str):
