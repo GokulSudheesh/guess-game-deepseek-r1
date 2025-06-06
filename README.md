@@ -39,7 +39,7 @@ A silly guess game for testing out the thinking capability of deep seek model ho
   PLATFORM_TO_USE=ollama
   ```
 
-### Settung up FastAPI
+### Setting up FastAPI
 
 - Install the required packages with poetry:
 
