@@ -1,5 +1,9 @@
+import logging
+from redis import asyncio as aioredis
 from enum import StrEnum
+from app.core.config import settings
 import uuid
+import json
 
 
 class ChatRole(StrEnum):
@@ -7,50 +11,42 @@ class ChatRole(StrEnum):
     ASSISTANT = "assistant"
 
 
-class ChatSession:
-    def __init__(self, session_id: str | None = None):
-        self.session_id = session_id or str(uuid.uuid4())
-        self.history = []
-
-    def add_message(self, role: ChatRole, content: str):
-        self.history.append({"role": role, "content": content})
-
-    def get_history(self) -> list[dict[str, str]]:
-        return self.history
-
-    def __repr__(self):
-        return f"ChatSession(session_id='{self.session_id}', history={self.history})"
-
-
 class ChatManager:
-    def __init__(self):
-        self.sessions: dict[str, ChatSession] = {}
+    def __init__(self, redis_client: aioredis.Redis):
+        self.redis_client = redis_client
 
-    def create_session(self) -> str:
-        session = ChatSession()
-        self.sessions[session.session_id] = session
-        return session.session_id
+    async def create_session(self) -> str:
+        session_id = str(uuid.uuid4())
+        return session_id
 
-    def get_session(self, session_id: str) -> ChatSession | None:
-        return self.sessions.get(session_id)
+    async def session_exists(self, session_id: str) -> bool:
+        count = await self.redis_client.exists(f"chat_history:{session_id}")
+        return count > 0
 
-    def add_message(self, *, session_id: str, role: ChatRole, content: str) -> bool:
-        session = self.get_session(session_id)
-        if session:
-            session.add_message(role, content)
+    async def add_message(self, *, session_id: str, role: ChatRole, content: str) -> bool:
+        try:
+            await self.redis_client.rpush(f"chat_history:{session_id}", json.dumps({"role": role, "content": content}))
+            count = await self.redis_client.exists(f"chat_history:{session_id}")
+            if (count == 1):
+                await self.redis_client.expire(f"chat_history:{session_id}", time=settings.REDIS_CHAT_TTL)
             return True
-        return False
-
-    def get_history(self, session_id: str) -> list[dict[str, str]] | None:
-        session = self.get_session(session_id)
-        return session.get_history() if session else None
-
-    def remove_session(self, session_id: str) -> bool:
-        if session_id in self.sessions:
-            del self.sessions[session_id]
-            return True
-        else:
+        except Exception as e:
+            logging.error(
+                f"Error adding message to Redis for session {session_id}: {e}")
             return False
 
-    def clear_sessions(self):
-        self.sessions.clear()
+    async def get_history(self, session_id: str) -> list[dict[str, str]] | None:
+        results = await self.redis_client.lrange(f"chat_history:{session_id}", 0, -1)
+        results = [json.loads(item) for item in (results)]
+        return results
+
+    async def remove_session(self, session_id: str) -> bool:
+        try:
+            if await self.session_exists(session_id):
+                await self.redis_client.delete(f"chat_history:{session_id}")
+                return True
+            else:
+                return False
+        except Exception as e:
+            logging.error(f"Error removing session {session_id}: {e}")
+            return False

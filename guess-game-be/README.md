@@ -1,3 +1,14 @@
-### Run the app
+### Setting up Backend Development Environment
 
-`poetry run uvicorn app.main:app --reload`
+- Run redis locally
+
+  ```bash
+  docker compose up redis
+  ```
+
+- Install the required packages with poetry:
+
+  ```bash
+  poetry install
+  poetry run uvicorn app.main:app
+  ```

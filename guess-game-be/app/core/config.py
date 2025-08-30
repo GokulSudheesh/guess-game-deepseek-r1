@@ -4,8 +4,6 @@ import sys
 from dotenv import load_dotenv
 from dataclasses import field
 from enum import StrEnum
-from datetime import datetime
-import re
 import logging
 
 logging.basicConfig(
@@ -47,11 +45,6 @@ class Settings():
     OLLAMA_MODEL_NAME: str = os.getenv(
         "OLLAMA_MODEL_NAME")
 
-    FILEPATH: str = os.path.join(
-        os.path.dirname(__file__),
-        "logs",
-        f"log-{re.sub(r'[:.]', '-', datetime.now().isoformat())}.txt"
-    )
     NVIDIA_MODEL_CONFIG: dict = field(default_factory=lambda: {
         "model": Settings.NVIDIA_MODEL_NAME,
         "api_key": Settings.NVIDIA_API_KEY,
@@ -65,6 +58,13 @@ class Settings():
         "temperature": 0.5,
         "max_tokens": 4096
     })
+
+    # REDIS
+    REDIS_HOST: str = os.getenv("REDIS_HOST")
+    REDIS_PORT: int = os.getenv("REDIS_PORT")
+    REDIS_DB: str = os.getenv("REDIS_DB", "0")
+    REDIS_PASSWORD: str = os.getenv("REDIS_PASSWORD")
+    REDIS_CHAT_TTL: int = 5 * 60 * 60
 
 
 settings = Settings()
