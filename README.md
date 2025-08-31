@@ -41,6 +41,12 @@ A silly guess game for testing out the thinking capability of deep seek model ho
 
 ### Setting up FastAPI
 
+- Run redis locally
+
+  ```bash
+  docker compose up redis
+  ```
+
 - Install the required packages with poetry:
 
   ```bash
