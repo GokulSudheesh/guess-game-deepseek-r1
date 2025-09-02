@@ -1,6 +1,8 @@
 import React, { useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { MenuState, AnswerEnum } from "@/types/options";
+import KittyCat from "@/components/kitty-cat";
+import { Spinner } from "@/components/ui/spinner";
 
 const AnswerMap: Record<AnswerEnum, string> = {
   [AnswerEnum.YES]: "Yes",
@@ -34,7 +36,7 @@ const Menu = ({
   );
   return (
     <div className="flex w-full max-[1080px]:flex-col max-[1080px]:gap-6 gap-10">
-      <div className="flex shrink-0 w-full sm:w-64 max-w-64 aspect-square h-fit bg-red-500 border-2 border-white" />
+      <KittyCat state={state === "thinking" ? "box" : "idle"} />
       <div className="flex flex-col gap-4 w-full items-center">
         {state === "initial" && (
           <>
@@ -53,6 +55,7 @@ const Menu = ({
         {state === "thinking" && (
           <>
             <p className="text-lg">Thinking...</p>
+            <Spinner variant="ellipsis" size={56} />
           </>
         )}
         {state === "asking" && question && (
