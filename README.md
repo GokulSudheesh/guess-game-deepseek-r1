@@ -19,6 +19,12 @@ A silly guess game for testing out the thinking capability of deep seek model ho
   NVIDIA_BASE_URL=https://integrate.api.nvidia.com/v1
   NVIDIA_MODEL_NAME=deepseek-ai/deepseek-r1
   PLATFORM_TO_USE=nvidia
+
+  # REDIS
+  REDIS_HOST=<REDIS_HOST>
+  REDIS_PORT=<REDIS_PORT>
+  REDIS_DB=0
+  REDIS_PASSWORD=<REDIS_PASSWORD>
   ```
 
 #### Alternative Setup for OLLAMA
@@ -37,6 +43,12 @@ A silly guess game for testing out the thinking capability of deep seek model ho
   OLLAMA_BASE_URL=your_local_ollama_url_here
   OLLAMA_MODEL_NAME=deepseek-r1
   PLATFORM_TO_USE=ollama
+
+  # REDIS
+  REDIS_HOST=<REDIS_HOST>
+  REDIS_PORT=<REDIS_PORT>
+  REDIS_DB=0
+  REDIS_PASSWORD=<REDIS_PASSWORD>
   ```
 
 ### Setting up FastAPI
