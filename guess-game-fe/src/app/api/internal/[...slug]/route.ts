@@ -1,12 +1,9 @@
 import { BASE_URL, API_ENDPOINT } from "@/config";
 
-export async function POST(
-  request: Request,
-  { params }: { params: Promise<{ slug: string[] }> }
-) {
-  const { slug } = await params;
-  const pathname = API_ENDPOINT + "/" + slug.join("/");
-  const proxyURL = new URL(pathname, BASE_URL);
+async function handleRequest(request: Request) {
+  const pathname = request.url.split("/internal/")[1];
+  const url = API_ENDPOINT + "/" + pathname;
+  const proxyURL = new URL(url, BASE_URL);
   const proxyRequest = new Request(proxyURL, request);
 
   try {
@@ -17,4 +14,12 @@ export async function POST(
 
     return new Response(message, { status: 500 });
   }
+}
+
+export async function POST(request: Request) {
+  return handleRequest(request);
+}
+
+export async function GET(request: Request) {
+  return handleRequest(request);
 }
