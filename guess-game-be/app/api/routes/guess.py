@@ -1,6 +1,7 @@
 import json
 import logging
 from fastapi import APIRouter, HTTPException, Depends
+from app.core.models.chat_history_response import ChatHistoryResponse
 from app.core.models.guess_request import AnswerEnum, GuessRequestBody, GuessResponseWrapper
 from app.core.utils.chat import ChatManager, ChatRole
 from app.core.chain.completion import completion
@@ -59,4 +60,15 @@ async def guess_ask(body: GuessRequestBody, chat_manager: ChatManager = Depends(
             "confidence": response.data.get("confidence"),
             "question_number": response.data.get("question_number"),
         }
+    )
+
+
+@router.get("/history/{session_id}")
+async def get_history(session_id: str,  chat_manager: ChatManager = Depends(get_chat_manager)) -> ChatHistoryResponse:
+    if not (session_id and await chat_manager.session_exists(session_id)):
+        raise HTTPException(
+            status_code=400, detail="Invalid session ID provided.")
+    chat_history = await chat_manager.get_history(session_id)
+    return ChatHistoryResponse(
+        data=chat_history[1:]
     )
