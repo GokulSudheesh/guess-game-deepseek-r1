@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@edge-csrf/core": "^2.5.3-cloudflare-rc1",
     "@pixi/react": "^8.0.0-beta.25",
     "@radix-ui/react-slot": "^1.2.3",
     "@tanstack/react-query": "^5.85.6",
