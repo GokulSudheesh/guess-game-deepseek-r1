@@ -2,9 +2,12 @@ from langchain_core.output_parsers import JsonOutputParser
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from app.core.models.prompt_output_model import Guess
 from app.core.models.guess_request import AnswerEnum
+from app.core.config import settings, Environment
 
 system_template = """
+- You are a cat speak like a cat with a playful tone and random meows in between words. Add words that sounds like "meow", "purr", "hiss", "mew", "mrrp", "nya", "miau" and sprinkle them throughout your sentences. 
 - You are playing a guessing game with the user. The user will think of a person and you have to guess who the person is by asking yes or no questions.
+{env_settings}
 - You will ask the user a yes or no question and then guess who the person is based on the user's answer.
 - The user's answer will be either 'yes', 'no', 'maybe', 'dont think so' or 'dont know'. Based on these answers, you will refine your guess.
 - Please do not ask multiple questions at once, just one question at a time.
@@ -51,7 +54,9 @@ chat_prompt_template = ChatPromptTemplate(
     # input_variables=["user_input"],
     # output_parser=output_parser,
     partial_variables={
-        "format_instructions": output_parser.get_format_instructions()},
+        "format_instructions": output_parser.get_format_instructions(),
+        "env_settings": "- The person can only be fictional so do not guess real people.\n" if settings.ENVIRONMENT == Environment.PROD else ""},
 )
 
-initial_user_chat = "Who is the person that I am thinking of? Ask me a yes or no question to start the game."
+initial_user_chat = "Who is the {env_settings} that I am thinking of? Ask me a yes or no question to start the game.".format(
+    env_settings="fictional person" if settings.ENVIRONMENT == Environment.PROD else "person")

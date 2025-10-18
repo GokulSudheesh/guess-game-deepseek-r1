@@ -41,7 +41,7 @@ const Menu = ({
         {state === "initial" && (
           <>
             <p className="text-lg">
-              Think of a person and I will try to guess who it is.
+              Think of a fictional person and I will try to guess who it is.
             </p>
             <Button
               variant="default"

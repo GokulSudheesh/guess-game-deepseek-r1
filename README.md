@@ -118,3 +118,9 @@ curl --location 'http://localhost:8000/api/v1/guess/ask' \
   }
 }
 ```
+
+## Running the entire application with Docker Compose
+
+```bash
+docker compose -f docker-compose.yaml up --build
+```

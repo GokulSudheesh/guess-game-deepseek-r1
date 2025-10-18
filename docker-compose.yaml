@@ -1,0 +1,18 @@
+services:
+  guess-game-be:
+    build: ./guess-game-be
+    depends_on:
+      - redis
+
+  guess-game-fe:
+    build: ./guess-game-fe
+    ports:
+      - "3000:3000"
+
+  redis:
+    image: "redis:alpine"
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    restart: always
+    container_name: redis
+    command: "redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}"
