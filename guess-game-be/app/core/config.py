@@ -68,3 +68,5 @@ class Settings():
 
 
 settings = Settings()
+
+logging.info(f"Loading environment: {settings.ENVIRONMENT}")

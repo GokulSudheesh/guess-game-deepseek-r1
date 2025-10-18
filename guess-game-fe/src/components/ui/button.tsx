@@ -66,6 +66,7 @@ function Button<E extends React.ElementType = typeof defaultElement>({
   const Comp = asChild ? Slot : as ?? defaultElement;
 
   return (
+    //@ts-ignore
     <Comp
       data-slot="button"
       className={cn(buttonVariants({ variant, size, className }))}
